@@ -1,11 +1,11 @@
 package com.pd.junitTest;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.HashMap;
-
-import static java.util.Map.Entry;
 
 public class Template {
 	private Map<String, String> variables; // 用 散 列表 存储 变量
@@ -21,28 +21,26 @@ public class Template {
 	}
 
 	public String evaluate() {
-		String result = templateText;
-		result = replaceVariables(result);
-		checkMissValue(result);
-		return result;
-	}
-
-	private String replaceVariables(String result) {
-		System.err.println(variables);
-		for (Entry<String, String> entry : variables.entrySet()) { // 遍历 变量
-
-			String regex = "\\$\\{" + entry.getKey()
-					+ "\\}"; /* （ 以下 2 行） 用 变量 值 替换 变量 */
-			result = result.replaceAll(regex, entry.getValue());
-
+		TemplateParse parser = new TemplateParse();
+		List<String> segments = parser.parse(templateText);
+		StringBuilder sb = new StringBuilder();
+		for (String segment : segments) {
+			append(segment, sb);
 		}
-		return result;
+		return sb.toString();
 	}
 
-	private void checkMissValue(String result) throws MissValueException {
-		Matcher matcher = Pattern.compile(".*\\$\\{.+\\}.*").matcher(result);
-		if (matcher.find()) {
-			throw new MissValueException("no value for " + matcher.group());
+	private void append(String segment, StringBuilder result) {
+		if (segment.startsWith("${") && segment.endsWith("}")) {
+			String var = segment.substring(2, segment.length() - 1);
+			if (!variables.containsKey(var)) {
+				throw new MissValueException("no value for " + segment);
+			}
+			result.append(variables.get(var));
+
+		} else {
+			result.append(segment);
 		}
 	}
+
 }
