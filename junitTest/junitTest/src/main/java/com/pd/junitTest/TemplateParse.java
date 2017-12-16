@@ -1,14 +1,13 @@
 package com.pd.junitTest;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TemplateParse {
-
-	public List<String> parse(String template) {
+	@Deprecated
+	private List<String> parse(String template) {
 		
 		List<String> segments = new ArrayList<String>();
 		int index = collectSegments(segments,template);
@@ -51,5 +50,24 @@ public class TemplateParse {
 		if(segments.isEmpty()){
 			segments.add("");
 		}
+	}
+
+
+	public List<Segment> parseSegments(String template) {
+		List<Segment> segments = new ArrayList<Segment>();
+		List<String> strings = parse(template);
+		for (String s:strings) {
+			if(isVariable(s)){
+				String name = s.substring(2, s.length()-1);
+				segments.add(new Variable(name));
+			}else{
+				segments.add(new PlainText(s));
+			}
+		}
+		return segments;
+	}
+	
+	public static boolean isVariable(String segment) {
+		return segment.startsWith("${") && segment.endsWith("}");
 	}
 }

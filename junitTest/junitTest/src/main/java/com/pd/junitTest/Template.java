@@ -3,9 +3,6 @@ package com.pd.junitTest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Template {
 	private Map<String, String> variables; // 用 散 列表 存储 变量
@@ -22,25 +19,17 @@ public class Template {
 
 	public String evaluate() {
 		TemplateParse parser = new TemplateParse();
-		List<String> segments = parser.parse(templateText);
-		StringBuilder sb = new StringBuilder();
-		for (String segment : segments) {
-			append(segment, sb);
-		}
+		List<Segment> segments = parser.parseSegments(templateText);
+		StringBuilder sb = concatenate(segments);
 		return sb.toString();
 	}
 
-	private void append(String segment, StringBuilder result) {
-		if (segment.startsWith("${") && segment.endsWith("}")) {
-			String var = segment.substring(2, segment.length() - 1);
-			if (!variables.containsKey(var)) {
-				throw new MissValueException("no value for " + segment);
-			}
-			result.append(variables.get(var));
-
-		} else {
-			result.append(segment);
+	private StringBuilder concatenate(List<Segment> segments) {
+		StringBuilder result = new StringBuilder();
+		for (Segment segment : segments) {
+			result.append(segment.evaluate(variables));
 		}
+		return result;
 	}
 
 }
