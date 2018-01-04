@@ -7,13 +7,26 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.pd.junitTest.loginTest.AuthenticationService;
+
 public class LoginServlet extends HttpServlet {
 	
 	
 	@Override
-	protected void service(HttpServletRequest arg0, HttpServletResponse arg1) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		arg1.sendRedirect("/invalidlogin");
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String username = request.getParameter("j_username");
+		String password = request.getParameter("j_password");
+		if(getAuthenticationService().isvalidlogin(username, password)){
+			response.sendRedirect("/frontpage");
+			request.getSession().setAttribute("username", username);
+		}else{
+			response.sendRedirect("/invalidlogin");
+		}
+		
 	}
 	
+	
+	protected AuthenticationService getAuthenticationService(){
+		return null;
+	}
 }
